@@ -131,8 +131,11 @@ if __name__ == '__main__':
     ttoken = config["main"]["token"]
     default_channel = config["channels"]["default"]
 
-    if (not ttoken or not default_channel):
-        print("Token or Channel not set")
+    if (not ttoken):
+        print("[{}] - Error: Required variable `main.token' empty or unset".format(getDate()))
+        exit()
+    elif (not default_channel):
+        print("[{}] - Error: Required value `channels.default' empty or unset".format(getDate()))
         exit()
     print("[{}] - Started Drone Notify. Default Notification Channel: {}".format(getDate(), default_channel))
     run(host='0.0.0.0', port=5000, quiet=True)
