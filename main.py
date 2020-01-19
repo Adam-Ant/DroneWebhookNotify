@@ -63,20 +63,27 @@ def doNotify(success, build):
             "text": notifymsg
     }
 
+    print("[{}] - Sending Telegram notification for {} #{}".format(getDate(),
+        build["repo"]["slug"], build["build"]["number"]))
     try:
         r = requests.post("https://api.telegram.org/bot{}/sendmessage".format(ttoken), json=postdata)
-        if (r.status_code == 200):
-            print("[{}] - Sent Webhook for repo {} to chat {}".format(getDate(), build["repo"]["slug"], tchat))
-        else:
-            print(r.text)
+        r.raise_for_status()
+    except requests.exceptions.HTTPError as err:
+        print("[{}] - Error: {}".format(getDate(), err))
+        print("[{}] - Failed to send notification for {}".format(getDate(), json.dumps(build)))
     except:
-         print("Warning: Telegram notify error!")
+        print("[{}] - Error: Failed to send Telegram notification!".format(getDate()))
 
 @post('/hook')
 def webhook():
     json = request.json
     if (json['event'] == 'build'):
-        print("[{}] - {} - Got a webook for {} build {} ({})".format(getDate(), request.remote_addr, json['repo']['slug'], json['build']['number'], json['build']['status']))
+        print("[{}] - {} - Got a webook for {} #{} ({})".format(getDate(),
+            request.remote_addr, json['repo']['slug'],
+            json['build']['number'],
+            json['build']['status']
+        ))
+
         if (json["build"]["status"] == "success"):
             doNotify(True, json)
             return "success"
