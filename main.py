@@ -138,4 +138,4 @@ if __name__ == '__main__':
         print("[{}] - Error: Required value `channels.default' empty or unset".format(getDate()))
         exit()
     print("[{}] - Started Drone Notify. Default Notification Channel: {}".format(getDate(), default_channel))
-    run(host='0.0.0.0', port=5000, quiet=True)
+    run(host='::', port=5000, quiet=True)
