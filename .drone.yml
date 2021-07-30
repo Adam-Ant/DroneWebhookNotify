@@ -7,6 +7,15 @@ platform:
   arch: amd64
 
 steps:
+- name: python-checks
+  pull: always
+  image: python
+  commands:
+    - pip install black prospector[with_bandit]
+    - pip install -r requirements.txt
+    - prospector --with-tool bandit main.py
+    - black --check main.py
+
 - name: build
   pull: always
   image: spritsail/docker-build
