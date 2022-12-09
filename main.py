@@ -20,6 +20,33 @@ def calcTime(start, end):
     return datestr
 
 
+def sendTelegramMsg(chatid, message):
+
+    postdata = {
+        "parse_mode": "html",
+        "disable_web_page_preview": "true",
+        "chat_id": chatid,
+        "text": message,
+    }
+
+    try:
+        r = requests.post(
+            "https://api.telegram.org/bot{}/sendmessage".format(ttoken), json=postdata
+        )
+        r.raise_for_status()
+
+    except requests.exceptions.HTTPError as err:
+        print("[{}] - Error: {}".format(getDate(), err))
+        print(
+            "[{}] - Failed to send notification for {}".format(
+                getDate(), json.dumps(postdata)
+            )
+        )
+
+    except Exception:
+        print("[{}] - Error: Failed to send Telegram notification!".format(getDate()))
+
+
 def doNotify(success, build):  # pylint: disable-msg=too-many-locals
 
     status = "SUCCESS" if success else "FAILURE"
@@ -87,32 +114,18 @@ def doNotify(success, build):  # pylint: disable-msg=too-many-locals
 
     tchat = config["channels"].get(build["repo"]["slug"], default_channel)
 
-    postdata = {
-        "parse_mode": "html",
-        "disable_web_page_preview": "true",
-        "chat_id": tchat,
-        "text": notifymsg,
-    }
-
     print(
-        "[{}] - Sending Telegram notification for {} #{}".format(
+        "[{}] - Sending Telegram notification(s) for {} #{}".format(
             getDate(), build["repo"]["slug"], build["build"]["number"]
         )
     )
-    try:
-        r = requests.post(
-            "https://api.telegram.org/bot{}/sendmessage".format(ttoken), json=postdata
-        )
-        r.raise_for_status()
-    except requests.exceptions.HTTPError as err:
-        print("[{}] - Error: {}".format(getDate(), err))
-        print(
-            "[{}] - Failed to send notification for {}".format(
-                getDate(), json.dumps(build)
-            )
-        )
-    except Exception:
-        print("[{}] - Error: Failed to send Telegram notification!".format(getDate()))
+
+    # Send normal telegram notification
+    sendTelegramMsg(tchat, notifymsg)
+
+    # If theres a failure channel defined & the build has failed, notify that too
+    if (not success) and failure_channel:
+        sendTelegramMsg(failure_channel, notifymsg)
 
 
 @post("/hook")
@@ -154,6 +167,12 @@ if __name__ == "__main__":
 
     ttoken = config["main"]["token"]
     default_channel = config["channels"]["default"]
+
+    # If a failure channel exists, assign it to a var
+    failure_channel = False
+
+    if config.has_option("channels", "failure"):
+        failure_channel = config["channels"]["failure"]
 
     if not ttoken:
         print(

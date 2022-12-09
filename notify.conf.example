@@ -3,5 +3,6 @@ token = TOKEN
 
 [channels]
 default = REQUIRED_VALUE
+failure = SECOND_CHANNEL_TO_NOTIFY_ON_FAIL
 spritsail/example = SECONDARY CHANNEL
 
