@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 
+# I know I should be using f-strings, but this codebase predates them and it works fine so ¯\_( ツ )_/¯
+# pylint: disable=consider-using-f-string
+
 from bottle import run, post, request
 from sys import argv
 from html import escape
@@ -31,7 +34,9 @@ def sendTelegramMsg(chatid, message):
 
     try:
         r = requests.post(
-            "https://api.telegram.org/bot{}/sendmessage".format(ttoken), json=postdata
+            "https://api.telegram.org/bot{}/sendmessage".format(ttoken),
+            json=postdata,
+            timeout=10,
         )
         r.raise_for_status()
 
@@ -47,7 +52,7 @@ def sendTelegramMsg(chatid, message):
         print("[{}] - Error: Failed to send Telegram notification!".format(getDate()))
 
 
-def doNotify(success, build):  # pylint: disable-msg=too-many-locals
+def doNotify(success, build):
 
     status = "SUCCESS" if success else "FAILURE"
 
