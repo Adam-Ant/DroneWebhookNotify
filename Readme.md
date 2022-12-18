@@ -1,3 +1,5 @@
+# Deprecated: This repo has been moved to [spritsail/drone-notify](https://github.com/spritsail/drone-notify). All further development will take place there.
+
 # Drone Webhook Notify
 
 This script sets up a webhook listener for Drone's global webhooks. It then sends a notification to a Telegram channel every time a build passes or fails.
